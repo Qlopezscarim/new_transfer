@@ -1,0 +1,51 @@
+/mnt/c/Users/Quintin/desktop/cen3907c-student-materials/Assignments/03 - Bootloader Development
+
+
+
+
+
+
+
+
+Maybe:
+as -o hello.o --march=i386 --32 hello.s
+as -o hello.o hello.s
+
+ld -m elf_i386 -o hello.elf -g --section-start=.text=0x7c00 --section-start=.data=0x0500 hello.o
+ld -o hello.bin --oformat binary -g -Ttext 0x7c00 hello.o -e _start 
+
+objcopy -O binary -j .text hello.elf hello.bin
+
+QEMU working:
+qemu-system-i386 -cpu 486 -nographic -drive file=hello.bin,format=raw -s -S
+gdb-multiarch -ex "target remote localhost:1234"
+
+Debugging
+symbol-file /home/quintin/Desktop/hello_world/hello.elf
+b *0x7c00
+b *0x0500
+b *0x7c1e
+set architecture i8086
+continue
+layout asm
+si
+
+
+
+
+qemu-system-x86_64 -cpu qemu64 -hda -nographic -device loader,file=hello.bin,addr=0x0500 -s -S
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

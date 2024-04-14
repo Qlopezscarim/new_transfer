@@ -1,0 +1,83 @@
+/mnt/c/Users/Quintin/desktop/cen3907c-student-materials/Assignments/03 - Bootloader Development
+i686-w64-mingw32-gcc -c x86-mini.s -o x86-mini.o
+i686-w64-mingw32-gcc -m32 -o x86-mini.elf x86-mini.o -nostartfiles -nostdlib
+-m32
+
+
+0x7c00
+
+arm-nonr-eabi
+WORKING:
+as -o x86-mini.o x86-mini.s
+(potentially)
+ld -m elf_x86_64 -s -o x86-mini x86-mini.o
+
+ld -m elf_i386 -s -o x86-mini x86-mini.o
+
+
+
+
+
+
+
+
+
+Maybe:
+as -o x86-mini.o --march=i386 --32 x86-mini.s
+as -o x86-mini.o x86-mini.s
+
+ld -m elf_i386 -o x86-mini.elf -g --section-start=.text=0x7c00 --section-start=.data=0x0500 x86-mini.o -e _start 
+ld -o x86-mini.bin --oformat binary -g -Ttext 0x7c00 x86-mini.o -e _start 
+
+objcopy -O binary -j .text x86-mini.elf x86-mini.bin
+
+QEMU working:
+qemu-system-i386 -cpu 486 -nographic -drive file=x86-mini.bin,format=raw -device loader,file=lemon_log.bin,addr=0x500 -s -S
+gdb-multiarch -ex "target remote localhost:1234"
+
+QEMU for arm:
+qemu-system-arm -M akita -nographic -drive file=arm-mini.bin,format=raw -device loader,file=lemon_log.bin,addr=0xA0000000 -s -S
+gdb-multiarch -ex "target remote localhost:1234"
+
+
+Debugging
+symbol-file /home/quintin/Desktop/hello_world/x86-mini.elf
+b *0x7c00
+b *0x0500
+b *0x7c1e
+b *0x7c21
+b *0x7c1c
+set architecture i8086
+continue
+layout asm
+si
+
+
+QEMU extra:
+	qemu-system-i386 -cpu 486 -nographic -drive file=x86-mini.bin,format=raw -device loader,file=lemon_log.bin,addr=0x500 -s -S
+
+
+
+qemu-system-x86_64 -cpu qemu64 -hda x86-mini.bin -nographic -s -S
+
+qemu-system-x86_64 -cpu qemu64 -hda -nographic -device loader,file=x86-mini.bin,addr=0x0500 -s -Sqemu-system-x86_64 -cpu qemu64 -hda -nographic -device loader,file=x86-mini.bin,addr=0x0500 -s -S
+
+
+
+
+
+
+
+
+
+
+
+
+
+Other suggestions:
+$ as --march=i386 --32 ./hello_world_gas.s -o hello_world_gas.o
+$ ld -m elf_i386 hello_world_gas.o -o hello_world_gas
+
+QEMU:
+qemu-system-i386 -cpu 486 -nographic -s -S -hda x86-mini.bin
+qemu-system-x64 -cpu qemu64 -device loader,file=image.bin,addr=0x1000
